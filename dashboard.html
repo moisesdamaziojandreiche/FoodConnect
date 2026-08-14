@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Dashboard</title><link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <aside id="sidebar"></aside>
+    <main class="content">
+        <h1>Dashboard</h1>
+        <p id="empresaNome" class="muted"></p>
+        <section class="grid">
+            <article class="card">
+                <span>Pedidos de hoje</span>
+                <strong id="todayOrders">0</strong>
+            </article>
+            <article class="card">
+                <span>Pendentes</span>
+                <strong id="pendingOrders">0</strong>
+            </article>
+            <article class="card">
+                <span>Em preparação</span>
+                <strong id="preparingOrders">0</strong>
+            </article>
+            <article class="card">
+                <span>Concluídos</span>
+                <strong id="completedOrders">0</strong>
+            </article>
+            <article class="card">
+                <span>Faturamento</span>
+                <strong id="revenue">R$ 0,00</strong>
+            </article>
+        </section>
+    </main>
+    <script type="module" src="js/dashboard/dashboard.js">
+    </script>
+</body>
+</html>

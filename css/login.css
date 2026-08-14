@@ -1,0 +1,30 @@
+.login-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+
+    background: linear-gradient(
+        135deg,
+        var(--cor-principal),
+        var(--cor-secundaria)
+    );
+}
+
+.login-card {
+    width: min(420px, 100%);
+    padding: 34px;
+
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 18px 50px #00000044;
+}
+
+.login-card button {
+    width: 100%;
+}
+
+.cad{
+    text-decoration: none;
+    color: var(--cor-secundaria);
+}

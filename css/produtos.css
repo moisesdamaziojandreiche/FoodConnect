@@ -1,0 +1,12 @@
+.product-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.product-main img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 10px;
+}

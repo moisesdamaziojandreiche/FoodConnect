@@ -1,0 +1,143 @@
+:root {
+    --cor-principal: #e85d04;
+    --cor-secundaria: #f48c06;
+    --cor-fundo: #f4f6f8;
+    --cor-card: #ffffff;
+    --cor-texto: #20242a;
+    --cor-texto-secundario: #6b7280;
+    --cor-sucesso: #16a34a;
+    --cor-alerta: #f59e0b;
+    --cor-erro: #dc2626;
+    --cor-sidebar: #1f2937;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+}
+
+button {
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 16px;
+    background: var(--cor-principal);
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px;
+    border: 1px solid #d5d9df;
+    border-radius: 9px;
+    font: inherit;
+}
+
+label {
+    display: block;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.content {
+    margin-left: 240px;
+    padding: 30px;
+}
+
+.card,
+.form-card,
+.order-card,
+.row {
+    background: var(--cor-card);
+    border-radius: 14px;
+    box-shadow: 0 2px 14px #0000000f;
+}
+
+.card,
+.form-card,
+.order-card {
+    padding: 20px;
+}
+
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.muted {
+    color: var(--cor-texto-secundario);
+}
+
+.error {
+    color: var(--cor-erro);
+}
+
+.list {
+    display: grid;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.row {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+#sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 220px;
+    padding: 24px 14px;
+    background: var(--cor-sidebar);
+    color: #ffffff;
+}
+
+#sidebar h2 {
+    padding: 0 10px;
+}
+
+#sidebar a,
+#sidebar button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    color: #ffffff;
+    background: transparent;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+}
+
+#sidebar a:hover,
+#sidebar button:hover {
+    background: #ffffff1a;
+}
+
+@media (max-width: 760px) {
+    #sidebar {
+        position: static;
+        width: 100%;
+    }
+
+    .content {
+        margin-left: 0;
+        padding: 18px;
+    }
+}

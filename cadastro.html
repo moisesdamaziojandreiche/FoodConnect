@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Cadastrar Empresa - FoodAdmin
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/global.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/cadastro.css"
+    >
+</head>
+
+<body class="cadastro-page">
+
+    <main class="cadastro-card">
+
+        <div class="cadastro-header">
+
+            <h1>
+                FoodAdmin
+            </h1>
+
+            <h2>
+                Cadastre sua empresa
+            </h2>
+
+            <p>
+                Crie sua conta para começar a gerenciar
+                seus produtos e pedidos.
+            </p>
+
+        </div>
+
+        <form id="cadastroForm">
+
+            <!-- DADOS DA EMPRESA -->
+
+            <div class="form-section">
+
+                <h3>
+                    Dados da empresa
+                </h3>
+
+                <label for="nomeEmpresa">
+                    Nome da empresa
+
+                    <input
+                        type="text"
+                        id="nomeEmpresa"
+                        placeholder="Ex: Lanchonete do João"
+                        required
+                    >
+                </label>
+
+                <label for="descricao">
+                    Descrição
+
+                    <textarea
+                        id="descricao"
+                        rows="4"
+                        placeholder="Conte um pouco sobre sua empresa"
+                    ></textarea>
+                </label>
+
+                <div class="form-grid">
+
+                    <label for="telefone">
+                        Telefone
+
+                        <input
+                            type="tel"
+                            id="telefone"
+                            placeholder="(63) 99999-9999"
+                        >
+                    </label>
+
+                    <label for="endereco">
+                        Endereço
+
+                        <input
+                            type="text"
+                            id="endereco"
+                            placeholder="Rua, número, bairro"
+                        >
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- RESPONSÁVEL -->
+
+            <div class="form-section">
+
+                <h3>
+                    Responsável
+                </h3>
+
+                <label for="responsavel">
+                    Nome do responsável
+
+                    <input
+                        type="text"
+                        id="responsavel"
+                        placeholder="Seu nome"
+                        required
+                    >
+                </label>
+
+            </div>
+
+            <!-- ACESSO -->
+
+            <div class="form-section">
+
+                <h3>
+                    Dados de acesso
+                </h3>
+
+                <label for="email">
+                    E-mail
+
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="empresa@email.com"
+                        autocomplete="email"
+                        required
+                    >
+                </label>
+
+                <div class="form-grid">
+
+                    <label for="senha">
+                        Senha
+
+                        <input
+                            type="password"
+                            id="senha"
+                            placeholder="Crie uma senha"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </label>
+
+                    <label for="confirmarSenha">
+                        Confirmar senha
+
+                        <input
+                            type="password"
+                            id="confirmarSenha"
+                            placeholder="Digite novamente"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </label>
+
+                </div>
+
+            </div>
+
+            <p
+                id="cadastroMensagem"
+                class="mensagem"
+            ></p>
+
+            <button
+                type="submit"
+                id="botaoCadastrar"
+            >
+                Cadastrar empresa
+            </button>
+
+        </form>
+
+        <div class="login-link">
+
+            <span>
+                Já possui uma conta?
+            </span>
+
+            <a href="login.html">
+                Entrar
+            </a>
+
+        </div>
+
+    </main>
+
+    <script
+        type="module"
+        src="js/auth/cadastro.js"
+    ></script>
+
+</body>
+
+</html>

@@ -1,0 +1,248 @@
+.cadastro-page {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px 20px;
+
+    background: linear-gradient(
+        135deg,
+        var(--cor-principal),
+        var(--cor-secundaria)
+    );
+}
+
+/* CARD PRINCIPAL */
+
+.cadastro-card {
+    width: min(760px, 100%);
+
+    background: #ffffff;
+
+    padding: 36px;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.20);
+}
+
+/* CABEÇALHO */
+
+.cadastro-header {
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+.cadastro-header h1 {
+    margin: 0;
+
+    color: var(--cor-principal);
+
+    font-size: 32px;
+}
+
+.cadastro-header h2 {
+    margin-top: 12px;
+    margin-bottom: 8px;
+
+    font-size: 24px;
+}
+
+.cadastro-header p {
+    margin: 0;
+
+    color: var(--cor-texto-secundario);
+
+    line-height: 1.5;
+}
+
+/* SEÇÕES */
+
+.form-section {
+    margin-bottom: 25px;
+
+    padding-bottom: 10px;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+
+    color: var(--cor-texto);
+
+    font-size: 18px;
+}
+
+/* GRID */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 16px;
+}
+
+/* CAMPOS */
+
+.cadastro-card label {
+    color: var(--cor-texto);
+
+    font-size: 14px;
+}
+
+.cadastro-card input,
+.cadastro-card textarea {
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.cadastro-card input:focus,
+.cadastro-card textarea:focus {
+    border-color:
+        var(--cor-principal);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(232, 93, 4, 0.12);
+}
+
+/* BOTÃO */
+
+#botaoCadastrar {
+    width: 100%;
+
+    padding: 13px;
+
+    font-size: 16px;
+
+    margin-top: 5px;
+
+    transition:
+        transform 0.2s,
+        opacity 0.2s;
+}
+
+#botaoCadastrar:hover {
+    transform:
+        translateY(-1px);
+}
+
+#botaoCadastrar:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+/* MENSAGENS */
+
+.mensagem {
+    display: none;
+
+    padding: 12px;
+
+    margin: 10px 0 15px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    text-align: center;
+}
+
+.mensagem.erro {
+    display: block;
+
+    color: var(--cor-erro);
+
+    background:
+        rgba(220, 38, 38, 0.10);
+
+    border:
+        1px solid
+        rgba(220, 38, 38, 0.20);
+}
+
+.mensagem.sucesso {
+    display: block;
+
+    color: var(--cor-sucesso);
+
+    background:
+        rgba(22, 163, 74, 0.10);
+
+    border:
+        1px solid
+        rgba(22, 163, 74, 0.20);
+}
+
+/* LOGIN */
+
+.login-link {
+    margin-top: 24px;
+
+    text-align: center;
+
+    color:
+        var(--cor-texto-secundario);
+
+    font-size: 14px;
+}
+
+.login-link a {
+    margin-left: 4px;
+
+    color:
+        var(--cor-principal);
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 650px) {
+
+    .cadastro-page {
+        padding: 15px;
+    }
+
+    .cadastro-card {
+        padding: 24px 20px;
+
+        border-radius: 14px;
+    }
+
+    .form-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+    .cadastro-header h1 {
+        font-size: 27px;
+    }
+
+    .cadastro-header h2 {
+        font-size: 21px;
+    }
+}

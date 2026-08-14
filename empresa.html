@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Empresa</title><link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/empresa.css">
+</head>
+<body>
+    <aside id="sidebar"></aside>
+    <main class="content">
+        <h1>Minha empresa</h1>
+        <form id="companyForm" class="form-card">
+            <label>Nome<input id="nome" required></label>
+            <label>Descrição<textarea id="descricao"></textarea></label>
+            <label>Telefone<input id="telefone"></label>
+            <label>Endereço<input id="endereco"></label>
+            <div class="form-grid">
+                <label>Abertura<input id="abertura" type="time"></label>
+                <label>Fechamento<input id="fechamento" type="time"></label>
+            </div>
+            <label>Logo<input id="logo" type="file" accept="image/*"></label>
+            <label>Imagem de capa<input id="capa" type="file" accept="image/*"></label>
+            <button type="submit">Salvar</button>
+        </form>
+    </main>
+    <script type="module" src="js/empresa/empresa.js"></script>
+</body>
+</html>
