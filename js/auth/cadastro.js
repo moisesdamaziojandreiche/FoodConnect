@@ -1,6 +1,4 @@
-import {
-    supabase
-} from '../config/supabase.js';
+import { supabase } from '../config/supabase.js';
 
 
 const cadastroForm =
