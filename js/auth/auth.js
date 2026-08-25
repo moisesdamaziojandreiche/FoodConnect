@@ -18,13 +18,26 @@ if (loginForm) {
 
         loginError.textContent = 'Entrando...';
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password
         });
 
         if (error) {
             loginError.textContent = error.message;
+            return;
+        }
+
+        const { data: vinculo, error: vinculoError } = await supabase
+            .from('usuarios_empresa')
+            .select('id')
+            .eq('user_id', data.user.id)
+            .maybeSingle();
+
+        if (vinculoError || !vinculo) {
+            await supabase.auth.signOut();
+            loginError.textContent =
+                'A conta foi autenticada, mas ainda não está vinculada a uma empresa.';
             return;
         }
 

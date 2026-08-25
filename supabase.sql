@@ -207,6 +207,63 @@ create index if not exists idx_item_pedido
 
 
 -- =========================================================
+-- CADASTRO AUTOMÁTICO DA EMPRESA
+-- =========================================================
+
+create or replace function public.criar_empresa_do_usuario()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    nova_empresa_id uuid;
+begin
+    if coalesce(new.raw_user_meta_data ->> 'tipo_cadastro', '') <> 'empresa' then
+        return new;
+    end if;
+
+    insert into public.empresas (
+        nome,
+        descricao,
+        telefone,
+        endereco
+    )
+    values (
+        nullif(new.raw_user_meta_data ->> 'empresa_nome', ''),
+        nullif(new.raw_user_meta_data ->> 'empresa_descricao', ''),
+        nullif(new.raw_user_meta_data ->> 'empresa_telefone', ''),
+        nullif(new.raw_user_meta_data ->> 'empresa_endereco', '')
+    )
+    returning id into nova_empresa_id;
+
+    insert into public.usuarios_empresa (
+        user_id,
+        empresa_id,
+        nome,
+        cargo
+    )
+    values (
+        new.id,
+        nova_empresa_id,
+        nullif(new.raw_user_meta_data ->> 'responsavel_nome', ''),
+        coalesce(nullif(new.raw_user_meta_data ->> 'cargo', ''), 'admin')
+    );
+
+    return new;
+end;
+$$;
+
+drop trigger if exists ao_criar_usuario_criar_empresa
+on auth.users;
+
+create trigger ao_criar_usuario_criar_empresa
+after insert on auth.users
+for each row
+execute function public.criar_empresa_do_usuario();
+
+
+-- =========================================================
 -- ROW LEVEL SECURITY (RLS)
 -- =========================================================
 
