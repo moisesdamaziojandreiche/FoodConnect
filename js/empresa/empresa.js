@@ -13,6 +13,8 @@ nome.value = empresa.nome || '';
 descricao.value = empresa.descricao || '';
 telefone.value = empresa.telefone || '';
 endereco.value = empresa.endereco || '';
+categoria.value = empresa.categoria || '';
+tempoPreparo.value = empresa.tempo_preparo_min || '';
 abertura.value = empresa.horario_abertura || '';
 fechamento.value = empresa.horario_fechamento || '';
 
@@ -62,6 +64,8 @@ companyForm.onsubmit = async (event) => {
             descricao: descricao.value.trim(),
             telefone: telefone.value.trim(),
             endereco: endereco.value.trim(),
+            categoria: categoria.value.trim() || null,
+            tempo_preparo_min: tempoPreparo.value ? Number(tempoPreparo.value) : null,
             horario_abertura: abertura.value || null,
             horario_fechamento: fechamento.value || null,
             updated_at: new Date().toISOString()
