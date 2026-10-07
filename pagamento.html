@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recebimentos - FoodConnect</title>
+  <link rel="stylesheet" href="css/pagamento.css" >
+</head>
+<body>
+<main>
+  <h1>Recebimentos</h1>
+  <p class="sub">Configure sua conta para receber os pagamentos dos pedidos.</p>
+
+  <div id="carregando" class="card">Carregando…</div>
+  <div id="erro" class="msg err hidden"></div>
+
+  <!-- Conta já criada -->
+  <section id="conta" class="card hidden">
+    <h2 style="margin-top:0;font-size:1.1rem">Sua conta de recebimento</h2>
+    <dl>
+      <dt>Situação geral</dt><dd id="st-general">—</dd>
+      <dt>Dados comerciais</dt><dd id="st-commercial">—</dd>
+      <dt>Dados bancários</dt><dd id="st-bank">—</dd>
+      <dt>Documentos</dt><dd id="st-docs">—</dd>
+      <dt>Comissão da plataforma</dt><dd id="st-comissao">—</dd>
+    </dl>
+    <div id="conta-aviso" class="msg"></div>
+    <button id="btn-atualizar" type="button">Atualizar situação</button>
+  </section>
+
+  <!-- Cadastro -->
+  <section id="cadastro" class="card hidden">
+    <h2 style="margin-top:0;font-size:1.1rem">Criar conta de recebimento</h2>
+    <p class="sub" style="margin-bottom:0">
+      Após o envio, você receberá um e-mail do Asaas para ativar a conta e enviar os documentos.
+      Os pedidos pagos só serão repassados automaticamente depois da aprovação.
+    </p>
+    <form id="form" novalidate>
+      <label for="name">Nome / razão social</label>
+      <input id="name" required />
+
+      <div class="row">
+        <div><label for="cpfCnpj">CPF ou CNPJ</label><input id="cpfCnpj" inputmode="numeric" required /></div>
+        <div><label for="email">E-mail</label><input id="email" type="email" required /></div>
+      </div>
+
+      <div id="box-cpf" class="hidden">
+        <label for="birthDate">Data de nascimento</label>
+        <input id="birthDate" type="date" />
+      </div>
+      <div id="box-cnpj" class="hidden">
+        <label for="companyType">Tipo de empresa</label>
+        <select id="companyType">
+          <option value="MEI">MEI</option>
+          <option value="LIMITED">Limitada (LTDA)</option>
+          <option value="INDIVIDUAL">Empresário individual</option>
+          <option value="ASSOCIATION">Associação</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div><label for="mobilePhone">Celular (com DDD)</label><input id="mobilePhone" inputmode="tel" required /></div>
+        <div><label for="incomeValue">Faturamento mensal (R$)</label><input id="incomeValue" type="number" min="1" step="0.01" required /></div>
+      </div>
+
+      <div class="row">
+        <div><label for="postalCode">CEP</label><input id="postalCode" inputmode="numeric" required /></div>
+        <div><label for="addressNumber">Número</label><input id="addressNumber" required /></div>
+      </div>
+      <label for="address">Endereço</label>
+      <input id="address" required />
+      <div class="row">
+        <div><label for="province">Bairro</label><input id="province" required /></div>
+        <div><label for="complement">Complemento (opcional)</label><input id="complement" /></div>
+      </div>
+
+      <div id="form-msg" class="msg hidden"></div>
+      <button id="btn-criar" type="submit">Criar conta de recebimento</button>
+    </form>
+  </section>
+</main>
+
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  // A anon key é pública por design (a mesma usada em js/ do painel).
+  // Usando a mesma URL, a sessão do login já existente é reaproveitada.
+  const SUPABASE_URL = "https://qhssnuzrvmrsnuzuiwdz.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_XP7PwbwclYA70bEPPKQ4-Q_nwGDgkAa";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const $ = (id) => document.getElementById(id);
+  const show = (id, on = true) => $(id).classList.toggle("hidden", !on);
+
+  async function chamar(body) {
+    const { data, error } = await supabase.functions.invoke("asaas-subconta", { body });
+    if (error) {
+      let msg = "Erro inesperado. Tente novamente.";
+      try { const j = await error.context.json(); if (j?.error) msg = j.error; } catch {}
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  const ROTULOS = {
+    APPROVED: ["Aprovado", "ok"],
+    PENDING: ["Pendente", "warn"],
+    AWAITING_APPROVAL: ["Em análise", "warn"],
+    AWAITING_ACTION_AUTHORIZATION: ["Aguardando autorização", "warn"],
+    REJECTED: ["Reprovado", "err"],
+  };
+  function badge(id, valor) {
+    const [txt, cls] = ROTULOS[valor] ?? [valor ?? "—", "warn"];
+    $(id).innerHTML = "";
+    const s = document.createElement("span");
+    s.className = "badge " + cls;
+    s.textContent = txt;
+    $(id).appendChild(s);
+  }
+
+  let empresa = null;
+
+  async function carregarStatus() {
+    $("btn-atualizar").disabled = true;
+    try {
+      const st = await chamar({ acao: "status" });
+      badge("st-general", st.general);
+      badge("st-commercial", st.commercialInfo);
+      badge("st-bank", st.bankAccountInfo);
+      badge("st-docs", st.documentation);
+      const aviso = $("conta-aviso");
+      aviso.className = "msg " + (st.split_ativo ? "ok" : "err");
+      aviso.textContent = st.split_ativo
+        ? "Conta aprovada: os pagamentos serão repassados automaticamente."
+        : "Conta ainda não aprovada. Conclua o cadastro pelo e-mail do Asaas. Enquanto isso, o repasse é feito manualmente pela plataforma.";
+    } catch (e) {
+      $("conta-aviso").className = "msg err";
+      $("conta-aviso").textContent = e.message;
+    } finally {
+      $("btn-atualizar").disabled = false;
+    }
+  }
+
+  async function iniciar() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { location.href = "login.html"; return; }
+
+    const { data: vinculo } = await supabase
+      .from("usuarios_empresa").select("empresa_id, cargo").maybeSingle();
+    if (!vinculo) throw new Error("Seu usuário não está vinculado a uma empresa.");
+    if (vinculo.cargo !== "admin") throw new Error("Apenas administradores podem configurar recebimentos.");
+
+    const { data: emp, error } = await supabase
+      .from("empresas")
+      .select("nome, asaas_wallet_id, comissao_percentual")
+      .eq("id", vinculo.empresa_id).single();
+    if (error) throw error;
+    empresa = emp;
+
+    show("carregando", false);
+    if (emp.asaas_wallet_id) {
+      $("st-comissao").textContent = Number(emp.comissao_percentual).toLocaleString("pt-BR") + "%";
+      show("conta");
+      await carregarStatus();
+    } else {
+      $("name").value = emp.nome ?? "";
+      show("cadastro");
+    }
+  }
+
+  // Campos extras conforme CPF/CNPJ
+  $("cpfCnpj").addEventListener("input", () => {
+    const n = $("cpfCnpj").value.replace(/\D/g, "").length;
+    show("box-cpf", n === 11);
+    show("box-cnpj", n === 14);
+  });
+
+  $("btn-atualizar").addEventListener("click", carregarStatus);
+
+  $("form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const msg = $("form-msg");
+    msg.className = "msg hidden";
+    $("btn-criar").disabled = true;
+    try {
+      const v = (id) => $(id).value.trim();
+      const doc = v("cpfCnpj").replace(/\D/g, "");
+      const body = {
+        acao: "criar",
+        name: v("name"), email: v("email"), cpfCnpj: doc,
+        mobilePhone: v("mobilePhone"), incomeValue: Number(v("incomeValue")),
+        postalCode: v("postalCode"), address: v("address"),
+        addressNumber: v("addressNumber"), province: v("province"),
+        complement: v("complement") || undefined,
+      };
+      if (doc.length === 11) body.birthDate = v("birthDate");
+      if (doc.length === 14) body.companyType = v("companyType");
+
+      const r = await chamar(body);
+      msg.className = "msg ok";
+      msg.textContent = r.mensagem;
+      setTimeout(() => location.reload(), 2500);
+    } catch (e) {
+      msg.className = "msg err";
+      msg.textContent = e.message;
+      $("btn-criar").disabled = false;
+    }
+  });
+
+  iniciar().catch((e) => {
+    show("carregando", false);
+    $("erro").textContent = e.message;
+    show("erro");
+  });
+</script>
+</body>
+</html>

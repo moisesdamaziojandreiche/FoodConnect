@@ -1,0 +1,27 @@
+:root { --bg:#f5f6f8; --card:#fff; --text:#1f2933; --muted:#667085; --brand:#e8590c; --ok:#2b8a3e; --warn:#b7791f; --err:#c92a2a; --line:#e4e7ec; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#14171a; --card:#1e2327; --text:#e8eaed; --muted:#9aa4af; --line:#2f363c; }
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+    main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 1.4rem; margin: 0 0 4px; }
+    p.sub { color: var(--muted); margin: 0 0 20px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
+    label { display:block; font-size:.85rem; color:var(--muted); margin:12px 0 4px; }
+    input, select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:transparent; color:var(--text); font-size:1rem; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+    button { margin-top:20px; width:100%; padding:12px; border:0; border-radius:8px; background:var(--brand); color:#fff; font-size:1rem; font-weight:600; cursor:pointer; }
+    button:disabled { opacity:.6; cursor:wait; }
+    .msg { padding:10px 12px; border-radius:8px; margin-top:12px; font-size:.95rem; }
+    .msg.err { background: color-mix(in srgb, var(--err) 14%, transparent); color: var(--err); }
+    .msg.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+    .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:.8rem; font-weight:600; }
+    .badge.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+    .badge.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+    .badge.err { background: color-mix(in srgb, var(--err) 18%, transparent); color: var(--err); }
+    dl { margin:0; display:grid; grid-template-columns: 1fr auto; gap:10px 12px; align-items:center; }
+    dt { color:var(--muted); }
+    dd { margin:0; text-align:right; }
+    .hidden { display:none; }
