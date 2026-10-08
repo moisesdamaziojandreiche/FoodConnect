@@ -1,19 +1,37 @@
-# FoodAdmin - Supabase
+# FoodAdmin - Painel do restaurante (Supabase)
 
-Painel multiempresa usando HTML, CSS, JavaScript puro e Supabase.
+Painel multiempresa em HTML, CSS, JavaScript puro e Supabase.
 
-```sql
-insert into public.usuarios_empresa(user_id,empresa_id,nome,cargo)
-values('UUID_DO_USUARIO','UUID_DA_EMPRESA','Administrador','admin');
-```
+## Banco de dados
 
-8. Rode o projeto com Live Server no VS Code e abra `login.html`.
+O esquema tem **uma fonte só**: `FoodConnect_RT/supabase/migrations/20261007000000_esquema_foodconnect.sql`
+(rode no SQL Editor, depois do `01_limpar_banco.sql`). O arquivo `supabase.sql` desta pasta foi esvaziado
+de propósito, porque descrevia colunas que não existem mais.
+
+Tabelas: `empresas`, `empresa_pagamento`, `usuarios_empresa`, `clientes`, `categorias`, `produtos`,
+`pedidos`, `itens_pedido`, `push_tokens`.
+
+## Cadastro de empresa
+
+`cadastro.html` chama `supabase.auth.signUp` com os metadados `tipo_cadastro='empresa'`, `nome_empresa`,
+`nome`, `telefone` e `endereco`. O trigger `criar_conta_no_cadastro()` cria sozinho a empresa, o vínculo em
+`usuarios_empresa` (cargo `admin`) e a linha de `empresa_pagamento`. **Não é preciso inserir nada à mão.**
+
+## Imagens
+
+Logo e capa vão para o bucket `imagens`, no caminho `empresas/<empresa_id>/...`.
+
+## Permissões que o painel tem
+
+- `empresas`: pode atualizar nome, descrição, logo, capa, telefone, endereço, horários e `ativo`.
+- `pedidos`: só **vê** pedidos já pagos (`payment_status` aprovado/reembolsado) e só altera `status`,
+  seguindo o fluxo validado pelo banco.
+- `empresa_pagamento`: só leitura, e sem a chave `asaas_api_key`.
 
 ## Realtime
-A tela `pedidos.html` carrega os pedidos da empresa e assina INSERT e UPDATE em `pedidos` com filtro por `empresa_id`.
 
-## Importante para o app do cliente
-Este SQL protege o painel administrativo. Para o aplicativo cliente inserir pedidos, crie policies específicas de INSERT conforme a autenticação usada no app, sem liberar permissões administrativas.
+A tela `pedidos.html` carrega os pedidos pagos da empresa e assina mudanças em `pedidos` filtrando por
+`empresa_id`; toca um som quando chega pedido novo.
 
 # FoodConnect: Pagamentos, Split e Acompanhamento do Pedido
 
@@ -57,32 +75,31 @@ App (cliente) atualiza em tempo real + recebe a notificação
 
 ## 2. Arquivos e onde ficam
 
-**Repositório do app (`FoodConnect_APP`)**
+**Repositório do app (`FoodConnect_RT`)**
 
 ```
 supabase/
 ├── migrations/
-│   ├── 20261006000000_asaas_pagamento.sql
-│   ├── 20261006000100_asaas_subconta.sql
-│   └── 20261006000200_acompanhamento_push.sql
+│   └── 20261007000000_esquema_foodconnect.sql   esquema completo (tabelas, RLS, triggers, storage)
 └── functions/
     ├── create-payment/index.ts      cria pedido + cobrança
     ├── asaas-webhook/index.ts       confirma pagamento
     ├── asaas-subconta/index.ts      cria/consulta subconta do restaurante
     └── notificar-pedido/index.ts    envia push ao cliente
 src/
-├── notificacoes.js                  token de push (ajuste a pasta ao seu padrão)
-└── AcompanharPedido.js              tela de acompanhamento (idem)
+├── screens/OrdersScreen.js          tela "Meus Pedidos" (tempo real)
+└── lib/cpf.js                       validação de CPF (mesma regra do banco)
 ```
 
 **Repositório do site (`FoodConnect`)**
 
 ```
-recebimentos.html                    restaurante cria a conta de recebimento
-js/status-pedido.js                  fluxo de status e botões do painel
+pagamento.html                       restaurante cria a conta de recebimento
+js/status_pedido/status_pedido.js    fluxo de status e botões do painel
+js/pedidos/pedidos.js                tela de pedidos com tempo real
 ```
 
-> A pasta antiga `supabase/functions/mp-webhook` (Mercado Pago) deve ser removida.
+> A função antiga `mp-webhook` (Mercado Pago) foi removida.
 
 ---
 
@@ -90,18 +107,16 @@ js/status-pedido.js                  fluxo de status e botões do painel
 
 ### 3.1 Banco de dados
 
-No **SQL Editor** do Supabase, rode **na ordem**, um arquivo por vez:
-
-1. `20261006000000_asaas_pagamento.sql`
-2. `20261006000100_asaas_subconta.sql`
-3. `20261006000200_acompanhamento_push.sql`
+No **SQL Editor** do Supabase, rode `01_limpar_banco.sql` e depois o esquema
+`20261007000000_esquema_foodconnect.sql` (de uma vez só).
 
 Confirme no **Table Editor**:
-- `pedidos` tem `payment_status`, `asaas_payment_id`, `asaas_invoice_url`, `paid_at`
-- `empresas` tem `asaas_wallet_id`, `asaas_split_ativo`, `comissao_percentual`
-- existem as tabelas `empresa_asaas_segredos`, `pedido_status_historico` e `push_tokens`
+- `pedidos` tem `payment_status`, `payment_method`, `asaas_payment_id`, `asaas_invoice_url`, `paid_at`
+- `empresa_pagamento` tem `asaas_wallet_id`, `asaas_split_ativo`, `comissao_percentual` (e a chave secreta `asaas_api_key`)
+- existem `empresas`, `usuarios_empresa`, `clientes`, `categorias`, `produtos`, `itens_pedido` e `push_tokens`
 
-> Se o painel atualiza outras colunas de `pedidos` ou `empresas` além das liberadas nas migrations, inclua-as no `GRANT UPDATE`, senão o painel dará erro de permissão.
+> Se o painel precisar atualizar outras colunas de `pedidos` ou `empresas`, inclua-as no `GRANT UPDATE`
+> do esquema; senão o painel dará erro de permissão.
 
 ### 3.2 Secrets (terminal, na raiz do app)
 
@@ -155,9 +170,9 @@ Use **uma** das opções (nunca as duas, senão o cliente recebe a notificação
 
 ### 3.6 Site (painel)
 
-- Em `recebimentos.html`, troque `COLE_AQUI_A_ANON_KEY` pela **anon key** do projeto (Project Settings → API). Use só a anon key, nunca a `service_role`.
-- Adicione um link para `recebimentos.html` no menu do painel.
-- Carregue `js/status-pedido.js` no `pedidos.html` e use `FoodStatus.acoes(status)` para montar os botões e `FoodStatus.atualizar(supabase, id, novoStatus)` para gravar. Filtre os pedidos `aguardando_pagamento` da lista e do realtime (`FoodStatus.visivelParaCozinha`).
+- A URL e a chave pública do projeto ficam em `js/config/supabase.js` (usadas por todas as páginas, inclusive `pagamento.html`). Use só a chave pública (anon/publishable), nunca a `service_role`.
+- O menu do painel já tem o link **Recebimentos** (`pagamento.html`).
+- `js/pedidos/pedidos.js` já usa `js/status_pedido/status_pedido.js` (`acoes`, `atualizar`, `visivelParaCozinha`).
 
 ### 3.7 App
 
@@ -167,16 +182,16 @@ npx eas init
 ```
 
 - Em `app.json`, adicione `"expo-notifications"` em `plugins`.
-- Depois do login: `registrarPushToken(supabase)`; no logout: `removerPushToken(supabase, token)`.
-- Na tela do pedido: `<AcompanharPedido supabase={supabase} pedidoId={id} />`.
+- Depois do login, registre o token com a função do banco: `supabase.rpc('registrar_push_token', { p_token, p_plataforma })`; no logout, apague a linha em `push_tokens` (o cliente pode `delete` o próprio token).
+- O acompanhamento em tempo real já está na tela **Meus Pedidos** (`OrdersScreen.js`).
 - Para abrir o pedido ao tocar na notificação: `aoTocarNotificacao(({ pedido_id }) => ...)`.
-- No carrinho, chame a função de pagamento e abra o link:
+- O carrinho (`CartScreen.js`) já chama a função de pagamento e abre o link:
 
 ```js
 const { data, error } = await supabase.functions.invoke('create-payment', {
-  body: { empresa_id, itens: [{ produto_id, quantidade }], nome, cpfCnpj, endereco_entrega },
+  body: { empresa_id, itens: [{ produto_id, quantidade }], cpfCnpj, observacao },
 });
-if (data?.invoice_url) Linking.openURL(data.invoice_url);
+if (data?.invoice_url) WebBrowser.openBrowserAsync(data.invoice_url);
 ```
 
 > **Push remoto não funciona no Expo Go** (SDK 53+). Para testar push, use um *development build* (`eas build`) em aparelho físico. Android exige credenciais FCM e iOS exige chave APNs (conta paga de desenvolvedor Apple). A tela em tempo real funciona no Expo Go.
@@ -240,22 +255,22 @@ try {
 | Pedir produto com `disponivel` desmarcado | erro `400`, nenhum pedido criado |
 | Chamar `create-payment` sem login | `401` |
 | Restaurante tentar mudar `valor_total`/`payment_status` direto na API | erro de permissão |
-| Mudar status de pedido `aguardando_pagamento` para `aceito` pelo painel | erro "Pedido ainda não foi pago" |
+| Mudar status de pedido `aguardando_pagamento` para `aceito` pelo painel | não aparece / erro de permissão (a RLS só mostra pedidos pagos) |
 
 ### 4.5 Subconta e split
 
-1. Abra `recebimentos.html` logado como **admin** do restaurante e preencha o cadastro. Pelo Asaas, a conta principal precisa ser **CNPJ** para criar subcontas via API.
+1. Abra `pagamento.html` logado como **admin** do restaurante e preencha o cadastro. Pelo Asaas, a conta principal precisa ser **CNPJ** para criar subcontas via API.
 2. O restaurante conclui o cadastro pelo e-mail do Asaas. Clique em **Atualizar situação**. Quando estiver aprovada, `asaas_split_ativo` vira `true`.
 3. Faça um pedido novo para essa empresa e pague. No painel do Asaas, a cobrança deve mostrar o split (por exemplo, 90% restaurante e 10% plataforma).
 
 **Atalho para testar sem criar subconta:**
 
 ```sql
-update empresas
+update empresa_pagamento
 set asaas_wallet_id = 'WALLET_ID_DA_CONTA_DE_TESTE',
     asaas_split_ativo = true,
     comissao_percentual = 10
-where id = 'ID_DA_EMPRESA';
+where empresa_id = 'ID_DA_EMPRESA';
 ```
 
 Sem `asaas_split_ativo = true`, todo o valor cai na conta da plataforma e o repasse é manual.
@@ -264,7 +279,7 @@ Sem `asaas_split_ativo = true`, todo o valor cai na conta da plataforma e o repa
 
 1. **Tempo real (Expo Go serve):** abra a tela do pedido no app. No Table Editor, mude o `status` do pedido (`aceito`, `preparando`…). A linha do tempo deve atualizar sozinha.
 2. **Push (development build, aparelho físico):** faça login e confira que surgiu uma linha em `push_tokens`. Feche o app, mude o status e a notificação deve chegar.
-3. **Histórico:** `pedido_status_historico` deve ter uma linha por mudança.
+3. **Banco:** confira em `pedidos` que `status` e `updated_at` mudam a cada ação do painel.
 4. Se não chegar, confira o log de **Edge Functions → notificar-pedido**. Um `401` indica que o `x-webhook-secret` difere de `NOTIFICAR_WEBHOOK_SECRET`. Se usar a Opção B, consulte:
    ```sql
    select id, status_code, content, created from net._http_response order by created desc limit 5;
@@ -276,9 +291,9 @@ Sem `asaas_split_ativo = true`, todo o valor cai na conta da plataforma e o repa
 
 **Cliente (app):** monta o carrinho, informa o CPF, é levado ao link de pagamento do Asaas, paga (Pix ou cartão) e volta ao app. A tela do pedido mostra "Aguardando pagamento" até o webhook confirmar, depois acompanha cada etapa e recebe um push a cada mudança.
 
-**Restaurante (painel):** recebe o pedido só **depois de pago**. Usa os botões para aceitar, iniciar preparo, marcar pronto, saiu para entrega e entregue. Cada clique notifica o cliente. Em `recebimentos.html`, acompanha a aprovação da conta de recebimento.
+**Restaurante (painel):** recebe o pedido só **depois de pago**. Usa os botões para aceitar, iniciar preparo, marcar pronto, saiu para entrega e entregue. Cada clique notifica o cliente. Em `pagamento.html`, acompanha a aprovação da conta de recebimento.
 
-**Dono da plataforma:** ajusta a comissão de cada empresa por SQL (`update empresas set comissao_percentual = 12 where id = '...'`). O restaurante não consegue alterar esse campo.
+**Dono da plataforma:** ajusta a comissão de cada empresa por SQL (`update empresa_pagamento set comissao_percentual = 12 where empresa_id = '...'`). O restaurante não consegue alterar esse campo.
 
 ---
 
@@ -309,7 +324,7 @@ Sem `asaas_split_ativo = true`, todo o valor cai na conta da plataforma e o repa
 | `502` no `create-payment` | o Asaas recusou a chamada | ver a linha `Erro Asaas:` no log da função |
 | Pedido pago continua `aguardando_pagamento` | webhook não chegou ou token diferente | ver histórico de webhooks no Asaas e o log do `asaas-webhook` |
 | Log "Valor divergente" | valor pago ≠ `valor_total` | a função recusa liberar de propósito; investigar |
-| Painel: erro de permissão ao atualizar | coluna não liberada no `GRANT` | incluir a coluna na migration |
+| Painel: erro de permissão ao atualizar | coluna não liberada no `GRANT` | incluir a coluna no `GRANT UPDATE` do esquema |
 | Sem push no Expo Go | push remoto removido do Expo Go (SDK 53+) | usar development build |
 | Push em dobro | Webhook do painel **e** trigger ativos | manter só um |
 
@@ -391,4 +406,3 @@ create trigger trg_notificar_mudanca_status
   for each row
   execute function public.notificar_mudanca_status();
 ```
-

@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase.js';
 import { contextoEmpresa, montarMenu } from '../utils/protecao.js';
+import { esc } from '../utils/formatacao.js';
 
 montarMenu();
 
@@ -19,7 +20,7 @@ async function carregarCategorias() {
     if (error) {
         box.innerHTML = `
             <p class="error">
-                ${error.message}
+                ${esc(error.message)}
             </p>
         `;
         return;
@@ -41,7 +42,7 @@ async function carregarCategorias() {
             (categoria) => `
                 <article class="row">
                     <div>
-                        <b>${categoria.nome}</b>
+                        <b>${esc(categoria.nome)}</b>
 
                         <p>
                             ${categoria.ativo ? 'Ativa' : 'Inativa'}
@@ -89,7 +90,7 @@ function adicionarEventosExcluir() {
 
 // Cria uma nova categoria
 newCategory.onclick = async () => {
-    const nome = prompt('Nome da categoria');
+    const nome = (prompt('Nome da categoria') || '').trim();
 
     if (!nome) {
         return;
@@ -99,12 +100,17 @@ newCategory.onclick = async () => {
         .from('categorias')
         .insert({
             empresa_id: contexto.empresa_id,
-            nome: nome.trim(),
+            nome,
             ativo: true
         });
 
     if (error) {
-        alert(error.message);
+        // unique (empresa_id, nome) no banco
+        alert(
+            error.code === '23505'
+                ? 'Já existe uma categoria com esse nome.'
+                : error.message
+        );
         return;
     }
 

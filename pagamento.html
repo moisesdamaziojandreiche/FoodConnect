@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recebimentos - FoodConnect</title>
-  <link rel="stylesheet" href="css/pagamento.css" >
+  <link rel="stylesheet" href="css/pagamento.css">
 </head>
 <body>
 <main>
@@ -81,14 +81,9 @@
 </main>
 
 <script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  // Mesmo cliente do resto do painel (js/config/supabase.js): reaproveita a sessão do login.
+  import { supabase } from "./js/config/supabase.js";
 
-  // A anon key é pública por design (a mesma usada em js/ do painel).
-  // Usando a mesma URL, a sessão do login já existente é reaproveitada.
-  const SUPABASE_URL = "https://qhssnuzrvmrsnuzuiwdz.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_XP7PwbwclYA70bEPPKQ4-Q_nwGDgkAa";
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const $ = (id) => document.getElementById(id);
   const show = (id, on = true) => $(id).classList.toggle("hidden", !on);
 
@@ -150,20 +145,28 @@
     if (!vinculo) throw new Error("Seu usuário não está vinculado a uma empresa.");
     if (vinculo.cargo !== "admin") throw new Error("Apenas administradores podem configurar recebimentos.");
 
+    // Nome vem de "empresas"; carteira/comissão ficam em "empresa_pagamento"
+    // (a chave secreta asaas_api_key não é legível pelo painel).
     const { data: emp, error } = await supabase
       .from("empresas")
-      .select("nome, asaas_wallet_id, comissao_percentual")
+      .select("nome")
       .eq("id", vinculo.empresa_id).single();
     if (error) throw error;
-    empresa = emp;
+
+    const { data: pag, error: pagErr } = await supabase
+      .from("empresa_pagamento")
+      .select("asaas_wallet_id, asaas_split_ativo, comissao_percentual")
+      .eq("empresa_id", vinculo.empresa_id).maybeSingle();
+    if (pagErr) throw pagErr;
+    empresa = { ...emp, ...(pag ?? {}) };
 
     show("carregando", false);
-    if (emp.asaas_wallet_id) {
-      $("st-comissao").textContent = Number(emp.comissao_percentual).toLocaleString("pt-BR") + "%";
+    if (empresa.asaas_wallet_id) {
+      $("st-comissao").textContent = Number(empresa.comissao_percentual ?? 0).toLocaleString("pt-BR") + "%";
       show("conta");
       await carregarStatus();
     } else {
-      $("name").value = emp.nome ?? "";
+      $("name").value = empresa.nome ?? "";
       show("cadastro");
     }
   }

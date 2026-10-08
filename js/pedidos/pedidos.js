@@ -1,151 +1,182 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { supabase } from '../config/supabase.js';
+import { contextoEmpresa, montarMenu } from '../utils/protecao.js';
+import { moeda, dataHora, esc } from '../utils/formatacao.js';
+import { tocarSom } from '../utils/notificacoes.js';
+import {
+    rotulo,
+    acoes,
+    visivelParaCozinha,
+    atualizar
+} from '../status_pedido/status_pedido.js';
 
-import { supabase } from "../lib/supabase";
-import Menu from "../components/Menu";
-import { ThemeContext } from "../context/ThemeContext";
+montarMenu();
 
-// Mesmos status que o painel do restaurante usa.
-const STATUS = {
-  aguardando_pagamento: "Aguardando pagamento",
-  pendente: "Pagamento aprovado — aguardando o restaurante",
-  aceito: "Pedido aceito",
-  preparando: "Em preparo",
-  pronto: "Pronto para retirada",
-  entregue: "Retirado",
-  cancelado: "Cancelado",
-};
+const contexto = await contextoEmpresa();
 
-export default function OrdersScreen({ navigation }) {
-  const { cores } = useContext(ThemeContext);
+const lista = document.getElementById('orders');
+const conexao = document.getElementById('connection');
+const somLigado = document.getElementById('soundToggle');
 
-  const [pedidos, setPedidos] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState(null);
+// ids dos pedidos que já estavam "pendente" na última carga
+// (para tocar o som só quando chega um pedido novo)
+let pendentesConhecidos = null;
 
-  const carregar = useCallback(async () => {
-    if (!supabase.from) {
-      setErro("Supabase não configurado");
-      setCarregando(false);
-      return;
+async function carregarPedidos() {
+    // A RLS só devolve pedidos JÁ PAGOS desta empresa.
+    const { data, error } = await supabase
+        .from('pedidos')
+        .select(`
+            id, status, valor_total, observacao, endereco_entrega,
+            cliente_nome, payment_status, payment_method, created_at,
+            itens_pedido ( nome_produto, quantidade, subtotal, observacao )
+        `)
+        .eq('empresa_id', contexto.empresa_id)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+    if (error) {
+        lista.innerHTML = `<p class="error">${esc(error.message)}</p>`;
+        return;
     }
 
-    // A RLS já garante que só voltam os pedidos do próprio cliente.
-    const { data, error } = await supabase
-      .from("pedidos")
-      .select("id, status, valor_total, created_at, empresas(nome, endereco)")
-      .order("created_at", { ascending: false });
+    const pedidos = (data || []).filter(visivelParaCozinha);
 
-    setErro(error ? error.message : null);
-    setPedidos(data || []);
-    setCarregando(false);
-  }, []);
+    const pendentes = new Set(
+        pedidos.filter((p) => p.status === 'pendente').map((p) => p.id)
+    );
 
-  useEffect(() => {
-    carregar();
+    if (pendentesConhecidos && somLigado.checked) {
+        const chegouNovo = [...pendentes].some(
+            (id) => !pendentesConhecidos.has(id)
+        );
 
-    if (!supabase.channel) return undefined;
-
-    let canal;
-    let cancelado = false;
-
-    // Tempo real: quando o restaurante muda o status no painel, a lista atualiza.
-    supabase.auth.getUser().then(({ data }) => {
-      const usuario = data?.user;
-      if (!usuario || cancelado) return;
-
-      canal = supabase
-        .channel(`meus-pedidos-${usuario.id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "pedidos",
-            filter: `cliente_id=eq.${usuario.id}`,
-          },
-          () => carregar()
-        )
-        .subscribe();
-    });
-
-    return () => {
-      cancelado = true;
-      if (canal) supabase.removeChannel(canal);
-    };
-  }, [carregar]);
-
-  return (
-    <View style={[styles.container, { backgroundColor: cores.fundo }]}>
-      <Text style={[styles.titulo, { color: cores.texto }]}>
-        Meus Pedidos
-      </Text>
-
-      <FlatList
-        data={pedidos}
-        keyExtractor={(item) => item.id}
-        refreshing={carregando}
-        onRefresh={carregar}
-        ListEmptyComponent={
-          <Text style={{ color: cores.secundario }}>
-            {erro
-              ? `Erro ao carregar: ${erro}`
-              : carregando
-              ? "Carregando..."
-              : "Você ainda não fez pedidos."}
-          </Text>
+        if (chegouNovo) {
+            tocarSom();
         }
-        renderItem={({ item }) => (
-          <View style={[styles.card, { backgroundColor: cores.card }]}>
-            <Text style={[styles.restaurante, { color: cores.texto }]}>
-              {item.empresas?.nome || "Restaurante"}
-            </Text>
+    }
 
-            <Text style={{ color: cores.principal, fontWeight: "bold" }}>
-              {STATUS[item.status] || item.status}
-            </Text>
+    pendentesConhecidos = pendentes;
 
-            {item.status === "pronto" && !!item.empresas?.endereco && (
-              <Text style={{ color: cores.texto, marginTop: 4 }}>
-                Retire em: {item.empresas.endereco}
-              </Text>
-            )}
-
-            <Text style={{ color: cores.secundario, marginTop: 4 }}>
-              R$ {Number(item.valor_total).toFixed(2)}  •{" "}
-              {new Date(item.created_at).toLocaleString("pt-BR")}
-            </Text>
-          </View>
-        )}
-      />
-
-      <Menu navigation={navigation} />
-    </View>
-  );
+    desenhar(pedidos);
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    paddingBottom: 90,
-  },
+function desenhar(pedidos) {
+    if (!pedidos.length) {
+        lista.innerHTML = '<p class="muted">Nenhum pedido pago ainda.</p>';
+        return;
+    }
 
-  titulo: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
+    lista.innerHTML = pedidos
+        .map((pedido) => {
+            const itens = (pedido.itens_pedido || [])
+                .map(
+                    (item) => `
+                        <li>
+                            ${item.quantidade}x ${esc(item.nome_produto)}
+                            — ${moeda(item.subtotal)}
+                            ${item.observacao ? `<br><small>Obs.: ${esc(item.observacao)}</small>` : ''}
+                        </li>
+                    `
+                )
+                .join('');
 
-  card: {
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 12,
-  },
+            const botoes = acoes(pedido.status, pedido)
+                .map(
+                    (acao) => `
+                        <button
+                            data-id="${pedido.id}"
+                            data-status="${acao.status}"
+                            ${acao.perigo ? 'class="danger"' : ''}
+                        >
+                            ${esc(acao.label)}
+                        </button>
+                    `
+                )
+                .join('');
 
-  restaurante: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-});
+            const reembolsado = pedido.payment_status === 'reembolsado';
+
+            return `
+                <article class="card order-card">
+                    <h3>
+                        #${pedido.id.slice(0, 8)} · ${esc(rotulo(pedido.status, pedido))}
+                    </h3>
+
+                    <p class="muted">
+                        ${esc(pedido.cliente_nome || 'Cliente')}
+                        · ${dataHora(pedido.created_at)}
+                    </p>
+
+                    <ul>${itens}</ul>
+
+                    <p><b>Total: ${moeda(pedido.valor_total)}</b>
+                        ${pedido.payment_method ? `(${esc(pedido.payment_method)})` : ''}
+                        ${reembolsado ? ' — REEMBOLSADO' : ''}
+                    </p>
+
+                    <p>
+                        ${pedido.endereco_entrega
+                            ? `Entrega: ${esc(pedido.endereco_entrega)}`
+                            : 'Retirada no restaurante'}
+                    </p>
+
+                    ${pedido.observacao
+                        ? `<p>Obs.: ${esc(pedido.observacao)}</p>`
+                        : ''}
+
+                    <div class="order-actions">${botoes}</div>
+                </article>
+            `;
+        })
+        .join('');
+
+    lista.querySelectorAll('button[data-status]').forEach((botao) => {
+        botao.onclick = async () => {
+            if (
+                botao.dataset.status === 'cancelado' &&
+                !confirm('Cancelar este pedido?')
+            ) {
+                return;
+            }
+
+            botao.disabled = true;
+
+            try {
+                await atualizar(
+                    supabase,
+                    botao.dataset.id,
+                    botao.dataset.status
+                );
+
+                await carregarPedidos();
+            } catch (erro) {
+                alert(erro.message);
+                botao.disabled = false;
+            }
+        };
+    });
+}
+
+// Tempo real: INSERT/UPDATE em pedidos desta empresa.
+supabase
+    .channel(`pedidos-empresa-${contexto.empresa_id}`)
+    .on(
+        'postgres_changes',
+        {
+            event: '*',
+            schema: 'public',
+            table: 'pedidos',
+            filter: `empresa_id=eq.${contexto.empresa_id}`
+        },
+        () => carregarPedidos()
+    )
+    .subscribe((estado) => {
+        conexao.textContent =
+            estado === 'SUBSCRIBED'
+                ? 'Conectado em tempo real'
+                : estado === 'CHANNEL_ERROR' || estado === 'TIMED_OUT'
+                ? 'Sem conexão em tempo real (recarregue a página)'
+                : 'Conectando...';
+    });
+
+await carregarPedidos();

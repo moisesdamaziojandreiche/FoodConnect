@@ -9,28 +9,30 @@ montarMenu();
 const contexto = await contextoEmpresa();
 const empresa = contexto.empresas || {};
 
+// O input type="time" quer HH:MM; o banco devolve HH:MM:SS.
+const hhmm = (valor) => (valor ? String(valor).slice(0, 5) : '');
+
 nome.value = empresa.nome || '';
 descricao.value = empresa.descricao || '';
 telefone.value = empresa.telefone || '';
 endereco.value = empresa.endereco || '';
-categoria.value = empresa.categoria || '';
-tempoPreparo.value = empresa.tempo_preparo_min || '';
-abertura.value = empresa.horario_abertura || '';
-fechamento.value = empresa.horario_fechamento || '';
+abertura.value = hhmm(empresa.horario_abertura);
+fechamento.value = hhmm(empresa.horario_fechamento);
 
+// Bucket "imagens". A policy de storage exige o caminho
+// empresas/<empresa_id>/<arquivo>.
 async function upload(file, nomeBase) {
     if (!file) {
         return null;
     }
 
-    const extensao = file.name.split('.').pop();
+    const extensao = (file.name.split('.').pop() || 'jpg').toLowerCase();
 
-    const caminho = `
-        ${contexto.empresa_id}/${nomeBase}-${Date.now()}.${extensao}
-    `.trim();
+    const caminho =
+        `empresas/${contexto.empresa_id}/${nomeBase}-${Date.now()}.${extensao}`;
 
     const { error } = await supabase.storage
-        .from('empresa-media')
+        .from('imagens')
         .upload(caminho, file, {
             upsert: true
         });
@@ -40,7 +42,7 @@ async function upload(file, nomeBase) {
     }
 
     return supabase.storage
-        .from('empresa-media')
+        .from('imagens')
         .getPublicUrl(caminho)
         .data.publicUrl;
 }
@@ -59,16 +61,15 @@ companyForm.onsubmit = async (event) => {
             'capa'
         );
 
+        // Só colunas liberadas no GRANT UPDATE de public.empresas.
+        // (updated_at é atualizado sozinho pelo trigger do banco.)
         const dadosEmpresa = {
             nome: nome.value.trim(),
-            descricao: descricao.value.trim(),
-            telefone: telefone.value.trim(),
-            endereco: endereco.value.trim(),
-            categoria: categoria.value.trim() || null,
-            tempo_preparo_min: tempoPreparo.value ? Number(tempoPreparo.value) : null,
+            descricao: descricao.value.trim() || null,
+            telefone: telefone.value.trim() || null,
+            endereco: endereco.value.trim() || null,
             horario_abertura: abertura.value || null,
-            horario_fechamento: fechamento.value || null,
-            updated_at: new Date().toISOString()
+            horario_fechamento: fechamento.value || null
         };
 
         if (logoUrl) {

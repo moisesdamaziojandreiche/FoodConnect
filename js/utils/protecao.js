@@ -1,5 +1,8 @@
 import { supabase } from '../config/supabase.js';
 
+// Retorna { empresa_id, cargo, empresas: {...}, user }.
+// A tabela usuarios_empresa NÃO tem coluna "nome": o nome da empresa
+// vem do relacionamento empresas(*).
 export async function contextoEmpresa() {
     const {
         data: { user },
@@ -13,7 +16,7 @@ export async function contextoEmpresa() {
 
     const { data, error } = await supabase
         .from('usuarios_empresa')
-        .select('empresa_id, nome, cargo, empresas(*)')
+        .select('empresa_id, cargo, empresas(*)')
         .eq('user_id', user.id)
         .single();
 
@@ -46,6 +49,7 @@ export function montarMenu() {
         <a href="produtos.html">Produtos</a>
         <a href="categorias.html">Categorias</a>
         <a href="empresa.html">Empresa</a>
+        <a href="pagamento.html">Recebimentos</a>
         <a href="configuracoes.html">Configurações</a>
 
         <button id="menuLogout">

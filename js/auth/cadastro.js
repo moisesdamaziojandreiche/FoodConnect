@@ -229,28 +229,24 @@ cadastroForm.addEventListener(
 
                         options: {
 
+                            // Chaves lidas pelo trigger criar_conta_no_cadastro():
+                            // tipo_cadastro, nome_empresa, nome, telefone, endereco
                             data: {
 
                                 tipo_cadastro:
                                     'empresa',
 
-                                empresa_nome:
+                                nome_empresa:
                                     nomeEmpresa,
 
-                                empresa_descricao:
-                                    descricao,
-
-                                empresa_telefone:
-                                    telefone,
-
-                                empresa_endereco:
-                                    endereco,
-
-                                responsavel_nome:
+                                nome:
                                     responsavel,
 
-                                cargo:
-                                    'admin'
+                                telefone:
+                                    telefone,
+
+                                endereco:
+                                    endereco
 
                             }
 
@@ -299,6 +295,25 @@ cadastroForm.addEventListener(
             */
 
             if (data.session) {
+
+                // O trigger do banco não grava a descrição: atualiza agora.
+                if (descricao) {
+
+                    await supabase
+                        .from('empresas')
+                        .update({ descricao })
+                        .eq(
+                            'id',
+                            (
+                                await supabase
+                                    .from('usuarios_empresa')
+                                    .select('empresa_id')
+                                    .eq('user_id', data.user.id)
+                                    .maybeSingle()
+                            ).data?.empresa_id
+                        );
+
+                }
 
                 mostrarSucesso(
                     'Empresa cadastrada com sucesso! Entrando no sistema...'
