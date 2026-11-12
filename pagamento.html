@@ -4,10 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recebimentos - FoodConnect</title>
+  <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/pagamento.css">
+    <link rel="icon" href="favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#e85d04">
 </head>
 <body>
-<main>
+<aside id="sidebar"></aside>
+<main class="content content-estreito">
   <h1>Recebimentos</h1>
   <p class="sub">Configure sua conta para receber os pagamentos dos pedidos.</p>
 
@@ -16,7 +24,7 @@
 
   <!-- Conta já criada -->
   <section id="conta" class="card hidden">
-    <h2 style="margin-top:0;font-size:1.1rem">Sua conta de recebimento</h2>
+    <h2>Sua conta de recebimento</h2>
     <dl>
       <dt>Situação geral</dt><dd id="st-general">—</dd>
       <dt>Dados comerciais</dt><dd id="st-commercial">—</dd>
@@ -30,8 +38,8 @@
 
   <!-- Cadastro -->
   <section id="cadastro" class="card hidden">
-    <h2 style="margin-top:0;font-size:1.1rem">Criar conta de recebimento</h2>
-    <p class="sub" style="margin-bottom:0">
+    <h2>Criar conta de recebimento</h2>
+    <p class="sub">
       Após o envio, você receberá um e-mail do Asaas para ativar a conta e enviar os documentos.
       Os pedidos pagos só serão repassados automaticamente depois da aprovação.
     </p>
@@ -39,7 +47,7 @@
       <label for="name">Nome / razão social</label>
       <input id="name" required />
 
-      <div class="row">
+      <div class="form-grid">
         <div><label for="cpfCnpj">CPF ou CNPJ</label><input id="cpfCnpj" inputmode="numeric" required /></div>
         <div><label for="email">E-mail</label><input id="email" type="email" required /></div>
       </div>
@@ -58,18 +66,18 @@
         </select>
       </div>
 
-      <div class="row">
+      <div class="form-grid">
         <div><label for="mobilePhone">Celular (com DDD)</label><input id="mobilePhone" inputmode="tel" required /></div>
         <div><label for="incomeValue">Faturamento mensal (R$)</label><input id="incomeValue" type="number" min="1" step="0.01" required /></div>
       </div>
 
-      <div class="row">
+      <div class="form-grid">
         <div><label for="postalCode">CEP</label><input id="postalCode" inputmode="numeric" required /></div>
         <div><label for="addressNumber">Número</label><input id="addressNumber" required /></div>
       </div>
       <label for="address">Endereço</label>
       <input id="address" required />
-      <div class="row">
+      <div class="form-grid">
         <div><label for="province">Bairro</label><input id="province" required /></div>
         <div><label for="complement">Complemento (opcional)</label><input id="complement" /></div>
       </div>
@@ -83,6 +91,9 @@
 <script type="module">
   // Mesmo cliente do resto do painel (js/config/supabase.js): reaproveita a sessão do login.
   import { supabase } from "./js/config/supabase.js";
+  import { montarMenu } from "./js/utils/protecao.js";
+
+  montarMenu();
 
   const $ = (id) => document.getElementById(id);
   const show = (id, on = true) => $(id).classList.toggle("hidden", !on);

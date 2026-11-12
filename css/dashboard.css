@@ -1,17 +1,150 @@
+/* =========================================================
+   DASHBOARD
+   Cada indicador tem sua cor de acento (--acento) e um ícone.
+   O último card (faturamento) é o destaque em gradiente.
+   ========================================================= */
+
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
     gap: 18px;
-    margin-top: 24px;
+    margin-top: 28px;
 }
 
-.card span {
+.grid .card {
+    --acento: var(--cor-principal);
+    --icone: var(--i-pedidos);
+
+    position: relative;
+    overflow: hidden;
+
+    padding: 22px 22px 20px;
+
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+.grid .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-md);
+}
+
+/* Filete de cor no topo */
+.grid .card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: var(--acento);
+}
+
+/* Ícone no canto: fundo translúcido (::after do card)
+   + glifo em máscara (::after do span) */
+.grid .card::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+    background-color: color-mix(in srgb, var(--acento) 14%, transparent);
+}
+
+.grid .card span {
     display: block;
+    max-width: calc(100% - 56px);
+
     color: var(--cor-texto-secundario);
+
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
-.card strong {
+.grid .card strong {
     display: block;
-    font-size: 28px;
-    margin-top: 10px;
+    margin-top: 14px;
+
+    font-family: var(--fonte-titulo);
+    font-size: clamp(2rem, 1.6rem + 1vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
+
+/* Glifo do ícone */
+.grid .card span::after {
+    content: "";
+    position: absolute;
+    top: 30px;
+    right: 30px;
+
+    width: 20px;
+    height: 20px;
+
+    background-color: var(--acento);
+    -webkit-mask: var(--icone) center / contain no-repeat;
+    mask: var(--icone) center / contain no-repeat;
+}
+
+.grid .card:nth-child(1) { --acento: var(--cor-principal);  --icone: var(--i-pedidos); }
+.grid .card:nth-child(2) { --acento: var(--cor-alerta);     --icone: var(--i-relogio); }
+.grid .card:nth-child(3) { --acento: var(--cor-secundaria); --icone: var(--i-chama); }
+.grid .card:nth-child(4) { --acento: var(--cor-sucesso);    --icone: var(--i-check); }
+
+.grid .card:nth-child(2) span::after { background-color: var(--cor-alerta-texto); }
+.grid .card:nth-child(4) span::after { background-color: var(--cor-sucesso-texto); }
+
+/* Faturamento: card de destaque */
+.grid .card:nth-child(5) {
+    --icone: var(--i-dinheiro);
+
+    grid-column: 1 / -1;
+    padding: 26px 28px;
+
+    color: #ffffff;
+    border-color: transparent;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgb(255 255 255 / 0.22),
+            transparent 55%
+        ),
+        linear-gradient(
+            135deg,
+            var(--cor-principal),
+            var(--cor-secundaria)
+        );
+
+    box-shadow: 0 14px 30px -12px rgb(232 93 4 / 0.55);
+}
+
+.grid .card:nth-child(5)::before {
+    display: none;
+}
+
+.grid .card:nth-child(5)::after {
+    background-color: rgb(255 255 255 / 0.22);
+}
+
+.grid .card:nth-child(5) span {
+    color: rgb(255 255 255 / 0.88);
+}
+
+.grid .card:nth-child(5) span::after {
+    background-color: #ffffff;
+}
+
+/* Atraso escalonado na entrada */
+.grid .card:nth-child(2) { animation-delay: 0.05s; }
+.grid .card:nth-child(3) { animation-delay: 0.1s; }
+.grid .card:nth-child(4) { animation-delay: 0.15s; }
+.grid .card:nth-child(5) { animation-delay: 0.2s; }

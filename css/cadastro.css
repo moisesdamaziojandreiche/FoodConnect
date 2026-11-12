@@ -1,3 +1,8 @@
+/* =========================================================
+   CADASTRO
+   (fundo em anéis, marca e campos vêm de global.css)
+   ========================================================= */
+
 .cadastro-page {
     min-height: 100vh;
 
@@ -5,213 +10,154 @@
     align-items: center;
     justify-content: center;
 
-    padding: 30px 20px;
+    padding: 32px 20px;
 
     background: linear-gradient(
         135deg,
         var(--cor-principal),
         var(--cor-secundaria)
-    );
+    ) fixed;
 }
-
-/* CARD PRINCIPAL */
 
 .cadastro-card {
-    width: min(760px, 100%);
+    width: min(740px, 100%);
+    padding: 42px 44px 38px;
 
-    background: #ffffff;
-
-    padding: 36px;
-
-    border-radius: 20px;
-
-    box-shadow:
-        0 20px 60px
-        rgba(0, 0, 0, 0.20);
+    background: var(--cor-card);
+    border-radius: 24px;
+    box-shadow: var(--sombra-lg);
 }
 
-/* CABEÇALHO */
+/* ----- Cabeçalho ----- */
 
 .cadastro-header {
-    text-align: center;
-
     margin-bottom: 30px;
+    text-align: center;
 }
 
 .cadastro-header h1 {
     margin: 0;
+    line-height: 0;
+}
 
-    color: var(--cor-principal);
-
-    font-size: 32px;
+.cadastro-header .marca {
+    margin-bottom: 18px;
 }
 
 .cadastro-header h2 {
-    margin-top: 12px;
-    margin-bottom: 8px;
-
-    font-size: 24px;
+    margin: 6px 0 8px;
+    font-size: clamp(1.6rem, 1.3rem + 1vw, 2rem);
+    font-weight: 800;
 }
 
 .cadastro-header p {
-    margin: 0;
-
+    max-width: 440px;
+    margin: 0 auto;
     color: var(--cor-texto-secundario);
-
-    line-height: 1.5;
 }
 
-/* SEÇÕES */
+/* ----- Seções numeradas ----- */
+
+#cadastroForm {
+    counter-reset: secao;
+}
 
 .form-section {
-    margin-bottom: 25px;
-
-    padding-bottom: 10px;
-
-    border-bottom: 1px solid #eeeeee;
+    margin-bottom: 26px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--cor-borda);
 }
 
 .form-section:last-of-type {
-    border-bottom: none;
+    border-bottom: 0;
 }
 
 .form-section h3 {
-    margin-top: 0;
-    margin-bottom: 18px;
+    counter-increment: secao;
 
-    color: var(--cor-texto);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 
-    font-size: 18px;
+    margin: 0 0 18px;
+    font-size: 1.05rem;
+    font-weight: 700;
 }
 
-/* GRID */
+.form-section h3::before {
+    content: counter(secao);
 
-.form-grid {
     display: grid;
+    place-items: center;
+    flex: none;
 
-    grid-template-columns:
-        repeat(2, 1fr);
+    width: 26px;
+    height: 26px;
 
-    gap: 16px;
+    border-radius: 50%;
+
+    background: color-mix(in srgb, var(--cor-principal) 13%, transparent);
+    color: var(--cor-link);
+
+    font-family: var(--fonte-corpo);
+    font-size: 0.8rem;
+    font-weight: 700;
 }
 
-/* CAMPOS */
-
-.cadastro-card label {
-    color: var(--cor-texto);
-
-    font-size: 14px;
-}
-
-.cadastro-card input,
-.cadastro-card textarea {
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
-}
-
-.cadastro-card input:focus,
-.cadastro-card textarea:focus {
-    border-color:
-        var(--cor-principal);
-
-    box-shadow:
-        0 0 0 3px
-        rgba(232, 93, 4, 0.12);
-}
-
-/* BOTÃO */
+/* ----- Botão ----- */
 
 #botaoCadastrar {
     width: 100%;
-
-    padding: 13px;
-
-    font-size: 16px;
-
-    margin-top: 5px;
-
-    transition:
-        transform 0.2s,
-        opacity 0.2s;
-}
-
-#botaoCadastrar:hover {
-    transform:
-        translateY(-1px);
+    margin-top: 6px;
+    padding: 14px;
+    font-size: 1rem;
 }
 
 #botaoCadastrar:disabled {
-    opacity: 0.6;
-
     cursor: not-allowed;
-
-    transform: none;
 }
 
-/* MENSAGENS */
+/* ----- Mensagens ----- */
 
 .mensagem {
     display: none;
 
-    padding: 12px;
+    margin: 6px 0 16px;
+    padding: 12px 14px;
 
-    margin: 10px 0 15px;
+    border-radius: var(--raio-sm);
 
-    border-radius: 8px;
-
-    font-size: 14px;
-
+    font-size: 0.9rem;
     text-align: center;
 }
 
 .mensagem.erro {
     display: block;
-
-    color: var(--cor-erro);
-
-    background:
-        rgba(220, 38, 38, 0.10);
-
-    border:
-        1px solid
-        rgba(220, 38, 38, 0.20);
+    color: var(--cor-erro-texto);
+    background: color-mix(in srgb, var(--cor-erro) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cor-erro) 24%, transparent);
 }
 
 .mensagem.sucesso {
     display: block;
-
-    color: var(--cor-sucesso);
-
-    background:
-        rgba(22, 163, 74, 0.10);
-
-    border:
-        1px solid
-        rgba(22, 163, 74, 0.20);
+    color: var(--cor-sucesso-texto);
+    background: color-mix(in srgb, var(--cor-sucesso) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cor-sucesso) 24%, transparent);
 }
 
-/* LOGIN */
+/* ----- Link de login ----- */
 
 .login-link {
-    margin-top: 24px;
-
+    margin-top: 26px;
     text-align: center;
-
-    color:
-        var(--cor-texto-secundario);
-
-    font-size: 14px;
+    color: var(--cor-texto-secundario);
+    font-size: 0.9rem;
 }
 
 .login-link a {
     margin-left: 4px;
-
-    color:
-        var(--cor-principal);
-
+    color: var(--cor-link);
     font-weight: 700;
-
     text-decoration: none;
 }
 
@@ -219,30 +165,15 @@
     text-decoration: underline;
 }
 
-/* RESPONSIVO */
+/* ----- Responsivo ----- */
 
 @media (max-width: 650px) {
-
     .cadastro-page {
-        padding: 15px;
+        padding: 16px;
     }
 
     .cadastro-card {
-        padding: 24px 20px;
-
-        border-radius: 14px;
-    }
-
-    .form-grid {
-        grid-template-columns:
-            1fr;
-    }
-
-    .cadastro-header h1 {
-        font-size: 27px;
-    }
-
-    .cadastro-header h2 {
-        font-size: 21px;
+        padding: 30px 22px 26px;
+        border-radius: 20px;
     }
 }

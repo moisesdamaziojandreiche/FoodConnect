@@ -42,7 +42,10 @@ export function montarMenu() {
     }
 
     sidebar.innerHTML = `
-        <h2>FoodAdmin</h2>
+        <h2>
+            <img class="marca-menu" src="assets/img/logo-icone.png" alt="" width="36" height="36">
+            FoodAdmin
+        </h2>
 
         <a href="dashboard.html">Dashboard</a>
         <a href="pedidos.html">Pedidos</a>
@@ -56,6 +59,14 @@ export function montarMenu() {
             Sair
         </button>
     `;
+
+    const paginaAtual = location.pathname.split('/').pop() || 'dashboard.html';
+
+    sidebar.querySelectorAll('a').forEach((link) => {
+        if (link.getAttribute('href') === paginaAtual) {
+            link.setAttribute('aria-current', 'page');
+        }
+    });
 
     const logoutButton = document.getElementById('menuLogout');
 

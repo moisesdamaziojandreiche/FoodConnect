@@ -1,12 +1,30 @@
+/* =========================================================
+   PRODUTOS
+   ========================================================= */
+
 .product-main {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
 }
 
 .product-main img {
-    width: 70px;
-    height: 70px;
+    flex: none;
+
+    width: 60px;
+    height: 60px;
+
     object-fit: cover;
-    border-radius: 10px;
+
+    border: 1px solid var(--cor-borda);
+    border-radius: 12px;
+    box-shadow: var(--sombra-sm);
+}
+
+.product-main b {
+    font-size: 1rem;
+}
+
+.product-main p {
+    font-variant-numeric: tabular-nums;
 }

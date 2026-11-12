@@ -97,7 +97,7 @@ function desenhar(pedidos) {
             const reembolsado = pedido.payment_status === 'reembolsado';
 
             return `
-                <article class="card order-card">
+                <article class="card order-card" data-status="${esc(pedido.status)}">
                     <h3>
                         #${pedido.id.slice(0, 8)} · ${esc(rotulo(pedido.status, pedido))}
                     </h3>

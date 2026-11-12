@@ -1,27 +1,143 @@
-:root { --bg:#f5f6f8; --card:#fff; --text:#1f2933; --muted:#667085; --brand:#e8590c; --ok:#2b8a3e; --warn:#b7791f; --err:#c92a2a; --line:#e4e7ec; }
-    @media (prefers-color-scheme: dark) {
-      :root { --bg:#14171a; --card:#1e2327; --text:#e8eaed; --muted:#9aa4af; --line:#2f363c; }
-    }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
-    main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
-    h1 { font-size: 1.4rem; margin: 0 0 4px; }
-    p.sub { color: var(--muted); margin: 0 0 20px; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
-    label { display:block; font-size:.85rem; color:var(--muted); margin:12px 0 4px; }
-    input, select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:transparent; color:var(--text); font-size:1rem; }
-    .row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-    @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
-    button { margin-top:20px; width:100%; padding:12px; border:0; border-radius:8px; background:var(--brand); color:#fff; font-size:1rem; font-weight:600; cursor:pointer; }
-    button:disabled { opacity:.6; cursor:wait; }
-    .msg { padding:10px 12px; border-radius:8px; margin-top:12px; font-size:.95rem; }
-    .msg.err { background: color-mix(in srgb, var(--err) 14%, transparent); color: var(--err); }
-    .msg.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
-    .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:.8rem; font-weight:600; }
-    .badge.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
-    .badge.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
-    .badge.err { background: color-mix(in srgb, var(--err) 18%, transparent); color: var(--err); }
-    dl { margin:0; display:grid; grid-template-columns: 1fr auto; gap:10px 12px; align-items:center; }
-    dt { color:var(--muted); }
-    dd { margin:0; text-align:right; }
-    .hidden { display:none; }
+/* =========================================================
+   RECEBIMENTOS
+   Usa global.css (tokens, sidebar, card, botões, campos).
+   ========================================================= */
+
+.content-estreito > * {
+    max-width: 720px;
+}
+
+.sub {
+    margin: 2px 0 24px;
+    color: var(--cor-texto-secundario);
+}
+
+.content-estreito .card {
+    margin-bottom: 18px;
+}
+
+.content-estreito .card h2 {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.content-estreito .card .sub {
+    margin-bottom: 8px;
+}
+
+/* Formulário: labels irmãs dos campos (não aninhadas) */
+#form label {
+    margin: 16px 0 0;
+}
+
+#form input,
+#form select {
+    margin-top: 6px;
+}
+
+#form .form-grid > div > label {
+    margin-top: 16px;
+}
+
+#form button[type="submit"],
+#btn-atualizar {
+    margin-top: 22px;
+}
+
+#btn-criar {
+    width: 100%;
+    padding: 13px;
+}
+
+/* ----- Lista de situação ----- */
+
+dl {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: stretch;
+
+    margin: 0;
+}
+
+dt,
+dd {
+    display: flex;
+    align-items: center;
+
+    margin: 0;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+dt {
+    color: var(--cor-texto-secundario);
+}
+
+dd {
+    justify-content: flex-end;
+    text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+dt:last-of-type,
+dd:last-of-type {
+    border-bottom: 0;
+}
+
+/* ----- Mensagens e selos ----- */
+
+.msg {
+    margin-top: 16px;
+    padding: 12px 14px;
+
+    border-radius: var(--raio-sm);
+
+    font-size: 0.92rem;
+}
+
+.msg:empty {
+    display: none;
+}
+
+.msg.err {
+    color: var(--cor-erro-texto);
+    background: color-mix(in srgb, var(--cor-erro) 11%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cor-erro) 24%, transparent);
+}
+
+.msg.ok {
+    color: var(--cor-sucesso-texto);
+    background: color-mix(in srgb, var(--cor-sucesso) 11%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cor-sucesso) 24%, transparent);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 3px 11px 3px 9px;
+
+    border-radius: 999px;
+
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.badge.ok   { color: var(--cor-sucesso-texto); background: color-mix(in srgb, var(--cor-sucesso) 14%, transparent); }
+.badge.warn { color: var(--cor-alerta-texto);  background: color-mix(in srgb, var(--cor-alerta) 18%, transparent); }
+.badge.err  { color: var(--cor-erro-texto);    background: color-mix(in srgb, var(--cor-erro) 13%, transparent); }
+
+.hidden {
+    display: none !important;
+}
