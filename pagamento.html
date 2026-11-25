@@ -98,23 +98,58 @@
   const $ = (id) => document.getElementById(id);
   const show = (id, on = true) => $(id).classList.toggle("hidden", !on);
 
-  async function chamar(body) {
-    const { data, error } = await supabase.functions.invoke("asaas-subconta", { body });
-    if (error) {
-      let msg = "Erro inesperado. Tente novamente.";
-      try { const j = await error.context.json(); if (j?.error) msg = j.error; } catch {}
-      throw new Error(msg);
+  
+async function chamar(body) {
+  const { data, error } = await supabase.functions.invoke(
+    "asaas-subconta",
+    { body }
+  );
+
+  if (error) {
+    let mensagem = error.message || "Erro inesperado.";
+    const status = error.context?.status;
+
+    if (error.context) {
+      try {
+        const resposta = await error.context.clone().text();
+
+        if (resposta) {
+          try {
+            const json = JSON.parse(resposta);
+            mensagem =
+              json.error ||
+              json.message ||
+              json.msg ||
+              mensagem;
+          } catch {
+            mensagem = resposta;
+          }
+        }
+      } catch (e) {
+        console.error("Falha ao ler resposta:", e);
+      }
     }
-    return data;
+
+    console.error("Erro ao chamar asaas-subconta:", {
+      status,
+      mensagem,
+      error
+    });
+
+    if (status === 404) {
+      mensagem = "A função asaas-subconta não foi encontrada no Supabase. Ela precisa ser criada e publicada.";
+    }
+
+    throw new Error(mensagem);
   }
 
-  const ROTULOS = {
-    APPROVED: ["Aprovado", "ok"],
-    PENDING: ["Pendente", "warn"],
-    AWAITING_APPROVAL: ["Em análise", "warn"],
-    AWAITING_ACTION_AUTHORIZATION: ["Aguardando autorização", "warn"],
-    REJECTED: ["Reprovado", "err"],
-  };
+  if (data?.error) {
+    throw new Error(data.error);
+  }
+
+  return data;
+};
+
   function badge(id, valor) {
     const [txt, cls] = ROTULOS[valor] ?? [valor ?? "—", "warn"];
     $(id).innerHTML = "";
