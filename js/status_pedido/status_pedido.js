@@ -75,12 +75,20 @@ export function visivelParaCozinha(pedido) {
 }
 
 export async function atualizar(supabase, pedidoId, novoStatus) {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('pedidos')
         .update({ status: novoStatus })
-        .eq('id', pedidoId);
+        .eq('id', pedidoId)
+        .select('id');
 
     if (error) {
         throw error;
+    }
+
+    // Sem erro mas sem linha alterada = a permissão (RLS) barrou em silêncio.
+    if (!data || data.length === 0) {
+        throw new Error(
+            'Não foi possível atualizar: pedido não encontrado ou sem permissão.'
+        );
     }
 }

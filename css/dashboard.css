@@ -148,3 +148,189 @@
 .grid .card:nth-child(3) { animation-delay: 0.1s; }
 .grid .card:nth-child(4) { animation-delay: 0.15s; }
 .grid .card:nth-child(5) { animation-delay: 0.2s; }
+
+
+
+/* =========================================================
+   FATURAMENTO MENSAL
+   (fica fora de .grid para não mexer nos cards de cima)
+   ========================================================= */
+
+.mensal {
+    margin-top: 40px;
+}
+
+.mensal-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.mensal-topo h2 {
+    margin: 0 0 4px;
+}
+
+.mensal-topo p {
+    margin: 0;
+}
+
+.mensal-mes {
+    display: block;
+    width: 190px;
+
+    color: var(--cor-texto-secundario);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.mensal-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.mensal-card {
+    padding: 20px 22px;
+
+    background: var(--cor-card);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-lg);
+    box-shadow: var(--sombra-sm);
+}
+
+.mensal-card span {
+    display: block;
+
+    color: var(--cor-texto-secundario);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.mensal-card strong {
+    display: block;
+    margin-top: 12px;
+
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.6rem, 1.3rem + 0.8vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.mensal-card small {
+    display: block;
+    margin-top: 8px;
+    min-height: 1em;
+
+    color: var(--cor-texto-secundario);
+    font-size: 0.8rem;
+}
+
+.mensal-card small.sobe {
+    color: var(--cor-sucesso-texto);
+}
+
+.mensal-card small.desce {
+    color: var(--cor-erro-texto);
+}
+
+/* Faturamento do mês: card de destaque */
+.mensal-card.destaque {
+    color: #ffffff;
+    border-color: transparent;
+
+    background:
+        radial-gradient(circle at 100% 0%, rgb(255 255 255 / 0.22), transparent 55%),
+        linear-gradient(135deg, var(--cor-principal), var(--cor-secundaria));
+
+    box-shadow: 0 14px 30px -12px rgb(232 93 4 / 0.55);
+}
+
+.mensal-card.destaque span,
+.mensal-card.destaque small,
+.mensal-card.destaque small.sobe,
+.mensal-card.destaque small.desce {
+    color: rgb(255 255 255 / 0.92);
+}
+
+/* Gráfico de barras por dia */
+.mensal-grafico {
+    margin-top: 18px;
+    padding: 22px;
+}
+
+.mensal-grafico h3 {
+    margin: 0 0 16px;
+}
+
+.grafico-barras {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    height: 220px;
+}
+
+.barra-dia {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.barra-area {
+    display: flex;
+    flex: 1;
+    align-items: flex-end;
+}
+
+.barra {
+    width: 100%;
+    min-height: 0;
+
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(
+        180deg,
+        var(--cor-secundaria),
+        var(--cor-principal)
+    );
+
+    transition: opacity 0.15s;
+}
+
+.barra-dia:hover .barra {
+    opacity: 0.75;
+}
+
+.barra-dia span {
+    margin-top: 6px;
+
+    color: var(--cor-texto-secundario);
+    font-size: 0.65rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+    .grafico-barras {
+        gap: 2px;
+        height: 180px;
+    }
+
+    /* Em tela pequena mostra o número de um dia sim, outro não */
+    .barra-dia:nth-child(even) span {
+        visibility: hidden;
+    }
+
+    .mensal-mes {
+        width: 100%;
+    }
+}

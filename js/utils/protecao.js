@@ -5,11 +5,12 @@ import { supabase } from '../config/supabase.js';
 // vem do relacionamento empresas(*).
 export async function contextoEmpresa() {
     const {
-        data: { user },
-        error: authError
-    } = await supabase.auth.getUser();
+        data: { session }
+    } = await supabase.auth.getSession();
 
-    if (authError || !user) {
+    const user = session?.user;
+
+    if (!user) {
         location.href = 'login.html';
         throw new Error('Não autenticado');
     }

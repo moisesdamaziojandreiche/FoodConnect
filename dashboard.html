@@ -35,8 +35,52 @@
                 <strong id="completedOrders">0</strong>
             </article>
             <article class="card">
-                <span>Faturamento</span>
+                <span>Faturamento de hoje</span>
                 <strong id="revenue">R$ 0,00</strong>
+            </article>
+        </section>
+
+        <section class="mensal">
+            <header class="mensal-topo">
+                <div>
+                    <h2>Faturamento mensal</h2>
+                    <p class="muted">Pedidos pagos e não cancelados.</p>
+                </div>
+
+                <label class="mensal-mes">
+                    Mês
+                    <input type="month" id="mesFaturamento">
+                </label>
+            </header>
+
+            <div class="mensal-cards">
+                <article class="mensal-card destaque">
+                    <span>Faturamento do mês</span>
+                    <strong id="mesTotal">R$ 0,00</strong>
+                    <small id="mesVariacao"></small>
+                </article>
+
+                <article class="mensal-card">
+                    <span>Pedidos pagos</span>
+                    <strong id="mesPedidos">0</strong>
+                </article>
+
+                <article class="mensal-card">
+                    <span>Ticket médio</span>
+                    <strong id="mesTicket">R$ 0,00</strong>
+                </article>
+
+                <article class="mensal-card">
+                    <span>Melhor dia</span>
+                    <strong id="mesMelhorDia">—</strong>
+                    <small id="mesMelhorDiaValor"></small>
+                </article>
+            </div>
+
+            <article class="card mensal-grafico">
+                <h3>Faturamento por dia</h3>
+                <div id="mesGrafico" class="grafico-barras"></div>
+                <p id="mesMensagem" class="muted"></p>
             </article>
         </section>
     </main>

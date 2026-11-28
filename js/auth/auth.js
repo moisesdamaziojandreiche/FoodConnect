@@ -3,6 +3,14 @@ import { supabase } from '../config/supabase.js';
 const loginForm = document.getElementById('loginForm');
 const logoutButton = document.getElementById('logout');
 
+if (loginForm) {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            location.replace('dashboard.html');
+        }
+    });
+}
+
 
 // =========================================================
 // LOGIN
